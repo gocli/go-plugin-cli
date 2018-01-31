@@ -1,0 +1,21 @@
+{
+  "name": "go-plugin-cli",
+  "version": "0.0.0",
+  "description": "Go plugin to create and execute commmands",
+  "main": "plugin.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gocli/go-plugin-cli.git"
+  },
+  "keywords": [
+    "command",
+    "template",
+    "cli"
+  ],
+  "author": "Stanislav Termosa <termosa.stanislav@gmail.com> (https://github.com/termosa)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gocli/go-plugin-cli/issues"
+  },
+  "homepage": "https://github.com/gocli/go-plugin-cli#readme"
+}
