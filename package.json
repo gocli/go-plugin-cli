@@ -1,8 +1,15 @@
 {
   "name": "go-plugin-cli",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Go plugin to create and execute commmands",
-  "main": "plugin.js",
+  "main": "dist/bundle.js",
+  "scripts": {
+    "start": "rollup -cw",
+    "ava": "npm run build && ava",
+    "test": "standard -v | snazzy && npm run ava",
+    "build": "rollup -c",
+    "prepublishOnly": "npm run test && npm run build"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gocli/go-plugin-cli.git"
@@ -10,12 +17,24 @@
   "keywords": [
     "command",
     "template",
-    "cli"
+    "cli",
+    "go"
   ],
   "author": "Stanislav Termosa <termosa.stanislav@gmail.com> (https://github.com/termosa)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/gocli/go-plugin-cli/issues"
   },
-  "homepage": "https://github.com/gocli/go-plugin-cli#readme"
+  "homepage": "https://github.com/gocli/go-plugin-cli#readme",
+  "devDependencies": {
+    "ava": "^0.25.0",
+    "rollup": "^0.55.3",
+    "rollup-plugin-buble": "^0.18.0",
+    "rollup-plugin-standard": "^1.0.0",
+    "snazzy": "^7.0.0",
+    "standard": "^10.0.3"
+  },
+  "dependencies": {
+    "minimist": "1.2.0"
+  }
 }
