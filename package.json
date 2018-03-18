@@ -49,6 +49,7 @@
   },
   "dependencies": {
     "@types/minimist": "^1.2.0",
+    "is-empty": "github:termosa/is-empty",
     "minimist": "1.2.0"
   },
   "standard": {

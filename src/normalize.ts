@@ -1,7 +1,4 @@
-import isEmpty from './is-empty'
-import isFunction from './is-function'
-import isString from './is-string'
-import isObject from './is-object'
+import isEmpty from 'is-empty'
 import { ICommand } from './plugin'
 
 interface IFail {
@@ -9,11 +6,15 @@ interface IFail {
 }
 
 const display = (value: any): any => {
-  if (isFunction(value)) {
+  if (!value) {
+    return value
+  }
+
+  if (typeof value === 'function') {
     return value.toString()
   }
 
-  if (!isObject(value)) {
+  if (typeof value !== 'object') {
     return value
   }
 
@@ -35,15 +36,18 @@ const normalize = (command: ICommand, fail: IFail): ICommand => {
     throw failGiven(command, '`command` should be a string, an object or an array and can not be empty')
   }
 
-  if (!isObject(command)) {
+  // tslint:disable-next-line: strict-type-predicates
+  if (typeof command !== 'object') {
     throw failGiven(command, '`command` should be an object')
   }
 
-  if (isEmpty(command.name) || !isString(command.name)) {
+  // tslint:disable-next-line: strict-type-predicates
+  if (typeof command.name !== 'string' || isEmpty(command.name.trim())) {
     throw failGiven(command.name, '`name` should be not empty string')
   }
 
-  if (command.callback && !isFunction(command.callback)) {
+  // tslint:disable-next-line: strict-type-predicates
+  if (command.callback && typeof command.callback !== 'function') {
     throw failGiven(command.callback, '`callback` must be a function')
   }
 
@@ -51,15 +55,18 @@ const normalize = (command: ICommand, fail: IFail): ICommand => {
     throw failGiven(command.commands, '`commands` must be an array and it can not be empty')
   }
 
-  if (command.description && (!isString(command.description) || isEmpty(command.description))) {
+  // tslint:disable-next-line: strict-type-predicates
+  if (command.description && (typeof command.description !== 'string' || isEmpty(command.description.trim()))) {
     throw failGiven(command.description, '`description` must be not empty string')
   }
 
-  if (command.title && (!isString(command.title) || isEmpty(command.title))) {
+  // tslint:disable-next-line: strict-type-predicates
+  if (command.title && (typeof command.title !== 'string' || isEmpty(command.title.trim()))) {
     throw failGiven(command.title, '`title` must be not empty string')
   }
 
-  if (command.prefix && (!isString(command.prefix) || isEmpty(command.prefix))) {
+  // tslint:disable-next-line: strict-type-predicates
+  if (command.prefix && (typeof command.prefix !== 'string' || isEmpty(command.prefix.trim()))) {
     throw failGiven(command.prefix, '`prefix` must be not empty string')
   }
 
