@@ -1,5 +1,5 @@
 class CliPluginError extends Error {
-  constructor (caller, error) {
+  constructor (caller: any, error: string | Error) {
     const message = error instanceof Error ? error.message : error ? error.toString() : error
     super(message)
 
@@ -10,6 +10,7 @@ class CliPluginError extends Error {
   }
 }
 
-const fail = (caller, error) => new CliPluginError(caller, error)
+const fail = (caller: any, error: string | Error) => new CliPluginError(caller, error)
 
 export default fail
+export { fail, CliPluginError }

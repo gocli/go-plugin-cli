@@ -47,9 +47,9 @@ go.registerCommand('ping', () => console.log('pong'))
 go.executeCommand('ping') // outputs: pong
 ```
 
-## API Reference
+### API Reference
 
-### go.registerCommand
+#### go.registerCommand
 
 ```
 go.registerCommand( command [ , callback ] )
@@ -59,7 +59,7 @@ Save command to execute it later.
 `command` can be an object with [command options](#command-options), an array of command objects, or a string.
 If `command` is given as a string, `callback` property is required.
 
-### go.executeCommand
+#### go.executeCommand
 
 ```
 go.executeCommand( command ): Promise<any>
@@ -67,7 +67,7 @@ go.executeCommand( command ): Promise<any>
 
 Find and call the command (string) if it is exists, or rejects the promise.
 
-### go.validateCommand
+#### go.validateCommand
 
 ```
 go.validateCommand( command ): Promise<boolean>
@@ -75,7 +75,7 @@ go.validateCommand( command ): Promise<boolean>
 
 Check if any registered callback can process the command (string).
 
-### go.getCommands
+#### go.getCommands
 
 ```
 go.getCommands(): Array
@@ -83,16 +83,16 @@ go.getCommands(): Array
 
 Return a tree representation of registered commands.
 
-## Command Options
+### Command Options
 
-### name
+#### name
 
 - **type**: `string`
 - **required**: yes
 
 What should be executed to trigger the command.
 
-### callback
+#### callback
 
 - **type**: `function`
 - **required**: if `command.commands` is empty
@@ -102,7 +102,7 @@ Will be called when `command.name` is triggered.
 `argv` contains arguments parsed by [minimist](https://npmjs.org/package/minimist) from executed command.
 `commandString` is raw string that was executed.
 
-### commands
+#### commands
 
 - **type**: `array`
 - **required**: if `command.callback` is empty
@@ -110,7 +110,7 @@ Will be called when `command.name` is triggered.
 Define nested commands.
 Nested commands has the [same syntax](#command-options).
 
-### description
+#### description
 
 - **type**: `string`
 - **required**: no
@@ -118,7 +118,7 @@ Nested commands has the [same syntax](#command-options).
 Add description for the command.
 Used by Go CLI [interactive menu](https://www.npmjs.com/package/go-cli#interactive-menu).
 
-### title
+#### title
 
 - **type**: `string`
 - **required**: no
@@ -126,7 +126,7 @@ Used by Go CLI [interactive menu](https://www.npmjs.com/package/go-cli#interacti
 Change prompt message for [nested commands](#commands).
 Used by Go CLI [interactive menu](https://www.npmjs.com/package/go-cli#interactive-menu).
 
-### prefix
+#### prefix
 
 - **type**: `string`
 - **required**: no

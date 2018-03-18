@@ -1,13 +1,16 @@
 import parse from './parse'
+import { ICommand } from './plugin'
 
-const matchCommand = (stash, triggered) => {
+const matchCommand = (stash: ICommand[], triggered: string[]): ICommand | void => {
   const command = stash.slice(0).reverse()
     .find(({ name }) => {
       return name.split(' ')
         .every((part, index) => part === triggered[index])
     })
 
-  if (!command) return
+  if (!command) {
+    return undefined
+  }
 
   const parts = command.name.split(' ')
 
@@ -22,7 +25,7 @@ const matchCommand = (stash, triggered) => {
   return command
 }
 
-const match = (stash, commandString) =>
+const match = (stash: ICommand[], commandString: string) =>
   matchCommand(stash, parse(commandString)._)
 
 export default match

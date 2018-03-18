@@ -2,12 +2,24 @@ import isEmpty from './is-empty'
 import isFunction from './is-function'
 import isString from './is-string'
 import isObject from './is-object'
+import { ICommand } from './plugin'
 
-const display = (value) => {
-  if (isFunction(value)) return value.toString()
-  if (!isObject(value)) return value
+interface IFail {
+  (msg: string): Error
+}
 
-  if (Array.isArray(value)) return value.map(display)
+const display = (value: any): any => {
+  if (isFunction(value)) {
+    return value.toString()
+  }
+
+  if (!isObject(value)) {
+    return value
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(display)
+  }
 
   return Object.keys(value).reduce((result, key) => ({
     ...result,
@@ -15,8 +27,8 @@ const display = (value) => {
   }), {})
 }
 
-const normalize = (command, fail) => {
-  const failGiven = (value, message) =>
+const normalize = (command: ICommand, fail: IFail): ICommand => {
+  const failGiven = (value: any, message: string) =>
     fail(`${message} (given: ${JSON.stringify(display(value))})`)
 
   if (isEmpty(command)) {
@@ -62,9 +74,10 @@ const normalize = (command, fail) => {
     prefix: command.prefix,
     callback: command.callback ? command.callback : undefined,
     commands: command.commands
-      ? command.commands.map((command) => normalize(command, fail))
+      ? command.commands.map((nestedCommand) => normalize(nestedCommand, fail))
       : undefined
   }
 }
 
 export default normalize
+export { normalize, IFail }
