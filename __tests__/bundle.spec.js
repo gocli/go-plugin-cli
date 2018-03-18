@@ -34,9 +34,9 @@ beforeEach(() => {
 
 describe('Cli Plugin', () => {
   it('export API', () => {
-    expect(typeof app.validateCommand).toBe('function', 'exports validateCommand()')
     expect(typeof app.executeCommand).toBe('function', 'exports executeCommand()')
     expect(typeof app.registerCommand).toBe('function', 'exports registerCommand()')
+    expect(typeof app.getCommands).toBe('function', 'exports getCommands()')
   })
 
   it('receive empty list of commands', () => {
@@ -146,40 +146,6 @@ describe('Cli Plugin', () => {
       fixture(id1),
       fixture(id2)
     ])
-  })
-
-  it('validate commands', async () => {
-    const command1 = fixture()
-    const command2 = fixture()
-    const [ name, name2 ] = [ command1.name, command2.name ]
-    app.registerCommand([ command1, command2 ])
-
-    expect(await app.validateCommand(name)).toBeTruthy()
-    expect(await app.validateCommand(name2)).toBeTruthy()
-    expect(await app.validateCommand(` ${name} `)).toBeTruthy()
-    expect(await app.validateCommand(`${name} extra`)).toBeTruthy()
-    expect(await app.validateCommand(`${name} --flag`)).toBeTruthy()
-    expect(await app.validateCommand(`--flag drop ${name}`)).toBeTruthy()
-
-    expect(await app.validateCommand(`${name}0`)).toBeFalsy()
-    expect(await app.validateCommand(`not_a_command_name ${name}`)).toBeFalsy()
-    expect(await app.validateCommand(`--flag ${name}`)).toBeFalsy()
-  })
-
-  it('validate nested command', async () => {
-    const command1 = fixture()
-    const command2 = fixture()
-    const [ name, nestedName ] = [ command1.name, command2.name ]
-    command1.commands = [ command2 ]
-    app.registerCommand(command1)
-
-    expect(await app.validateCommand(name)).toBeTruthy()
-    expect(await app.validateCommand(`${name} ${nestedName}`)).toBeTruthy()
-    expect(await app.validateCommand(`${name} -k ${nestedName}`)).toBeTruthy()
-
-    expect(await app.validateCommand(`${name} not_a_command_name ${nestedName}`)).toBeFalsy()
-    expect(await app.validateCommand(`${nestedName} ${name}`)).toBeFalsy()
-    expect(await app.validateCommand(nestedName)).toBeFalsy()
   })
 
   it('execute commands', async () => {

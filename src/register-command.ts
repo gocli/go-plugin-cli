@@ -1,7 +1,7 @@
-import normalize from './normalize'
+import { normalizeCommand } from './normalize-command'
 import { ICommand, ICommandCallback } from './plugin'
 
-const register = (stash: ICommand[], commands: string | ICommand | ICommand[], callback?: ICommandCallback) => {
+const registerCommand = (stash: ICommand[], commands: string | ICommand | ICommand[], callback?: ICommandCallback) => {
   // tslint:disable-next-line: strict-type-predicates
   if (typeof commands === 'undefined') {
     throw new Error('`command` is required')
@@ -24,9 +24,9 @@ const register = (stash: ICommand[], commands: string | ICommand | ICommand[], c
   }
 
   commands
-    .map((command) => normalize(command, (error) => { throw error }))
+    .map(normalizeCommand)
     .forEach((command) => stash.push(command))
 }
 
-export default register
-export { register }
+export default registerCommand
+export { registerCommand }

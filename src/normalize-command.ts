@@ -1,10 +1,6 @@
 import isEmpty from 'is-empty'
 import { ICommand } from './plugin'
 
-interface IFail {
-  (msg: string): Error
-}
-
 const display = (value: any): any => {
   if (!value) {
     return value
@@ -28,9 +24,10 @@ const display = (value: any): any => {
   }), {})
 }
 
-const normalize = (command: ICommand, fail: IFail): ICommand => {
-  const failGiven = (value: any, message: string) =>
-    fail(`${message} (given: ${JSON.stringify(display(value))})`)
+const normalizeCommand = (command: ICommand): ICommand => {
+  const failGiven = (value: any, message: string) => {
+    throw new Error(`${message} (given: ${JSON.stringify(display(value))})`)
+  }
 
   if (isEmpty(command)) {
     throw failGiven(command, '`command` should be a string, an object or an array and can not be empty')
@@ -75,16 +72,16 @@ const normalize = (command: ICommand, fail: IFail): ICommand => {
   }
 
   return {
-    name: command.name,
-    description: command.description,
-    title: command.title,
-    prefix: command.prefix,
+    name: command.name.trim(),
+    description: command.description ? command.description.trim() : command.description,
+    title: command.title ? command.title.trim() : command.title,
+    prefix: command.prefix ? command.prefix.trim() : command.prefix,
     callback: command.callback ? command.callback : undefined,
     commands: command.commands
-      ? command.commands.map((nestedCommand) => normalize(nestedCommand, fail))
+      ? command.commands.map(normalizeCommand)
       : undefined
   }
 }
 
-export default normalize
-export { normalize, IFail }
+export default normalizeCommand
+export { normalizeCommand }

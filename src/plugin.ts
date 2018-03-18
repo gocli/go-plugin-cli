@@ -1,6 +1,5 @@
-import validate from './validate'
 import execute from './execute'
-import register from './register'
+import { registerCommand } from './register-command'
 import { ParsedArgs } from 'minimist'
 
 interface ICommandCallback {
@@ -17,14 +16,12 @@ interface ICommand {
 }
 
 interface ICliPlugable {
-  validateCommand? (command: string): Promise<boolean>
   executeCommand? (command: string): Promise<void>
   registerCommand? (stash: ICommand[], caller: any, commands: string | ICommand | ICommand[], callback?: ICommandCallback): void
   getCommands? (): ICommand[]
 }
 
 interface ICliPlugged {
-  validateCommand (command: string): Promise<boolean>
   executeCommand (command: string): Promise<void>
   registerCommand (stash: ICommand[], caller: any, commands: string | ICommand | ICommand[], callback?: ICommandCallback): void
   getCommands (): ICommand[]
@@ -33,21 +30,9 @@ interface ICliPlugged {
 const CliPlugin = (proto: ICliPlugable = {}): ICliPlugged => {
   const stash: ICommand[] = []
 
-  const validateCommand = (commandString: string) =>
-    validate(stash, commandString)
-
-  const executeCommand = (commandString: string) =>
-    execute(stash, commandString)
-
-  const registerCommand = (command: string | ICommand | ICommand[], callback?: ICommandCallback) =>
-    register(stash, command, callback)
-
-  const getCommands = () => stash
-
-  proto.validateCommand = validateCommand
-  proto.executeCommand = executeCommand
-  proto.registerCommand = registerCommand
-  proto.getCommands = getCommands
+  proto.executeCommand = execute.bind(null, stash)
+  proto.registerCommand = registerCommand.bind(null, stash)
+  proto.getCommands = () => stash
 
   return proto as ICliPlugged
 }
