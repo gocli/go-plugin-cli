@@ -37,7 +37,7 @@ const CliPlugin = (proto: ICliPlugable = {}): ICliPlugged => {
     validate(stash, commandString)
 
   const executeCommand = (commandString: string) =>
-    execute(stash, commandString, executeCommand)
+    execute(stash, commandString)
 
   const registerCommand = (command: string | ICommand | ICommand[], callback?: ICommandCallback) =>
     register(stash, command, callback)
