@@ -1,4 +1,4 @@
-import execute from './execute'
+import { executeCommand } from './execute-command'
 import { registerCommand } from './register-command'
 import { ParsedArgs } from 'minimist'
 
@@ -30,7 +30,7 @@ interface ICliPlugged {
 const CliPlugin = (proto: ICliPlugable = {}): ICliPlugged => {
   const stash: ICommand[] = []
 
-  proto.executeCommand = execute.bind(null, stash)
+  proto.executeCommand = executeCommand.bind(null, stash)
   proto.registerCommand = registerCommand.bind(null, stash)
   proto.getCommands = () => stash
 

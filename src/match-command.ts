@@ -1,7 +1,7 @@
 import parse from './parse'
 import { ICommand } from './plugin'
 
-const matchCommand = (stash: ICommand[], triggered: string[]): ICommand | void => {
+const match = (stash: ICommand[], triggered: string[]): ICommand | void => {
   const command = stash.slice(0).reverse()
     .find(({ name }) => {
       return name.split(' ')
@@ -19,13 +19,14 @@ const matchCommand = (stash: ICommand[], triggered: string[]): ICommand | void =
   }
 
   if (Array.isArray(command.commands)) {
-    return matchCommand(command.commands, triggered.slice(parts.length))
+    return match(command.commands, triggered.slice(parts.length))
   }
 
   return command
 }
 
-const match = (stash: ICommand[], commandString: string) =>
-  matchCommand(stash, parse(commandString)._)
+const matchCommand = (stash: ICommand[], commandString: string) =>
+  match(stash, parse(commandString)._)
 
-export default match
+export default matchCommand
+export { matchCommand }

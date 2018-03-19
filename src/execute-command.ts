@@ -1,14 +1,14 @@
 import parse from './parse'
-import match from './match'
+import { matchCommand } from './match-command'
 import { ICommand } from './plugin'
 
-const execute = (stash: ICommand[], commandString: string) => {
+const executeCommand = (stash: ICommand[], commandString: string) => {
   // tslint:disable-next-line: strict-type-predicates
   if (typeof commandString !== 'string') {
     throw new Error('`command` should be not empty string')
   }
 
-  const command = match(stash, commandString)
+  const command = matchCommand(stash, commandString)
 
   if (!command) {
     return Promise.reject(new Error('command is not registered'))
@@ -22,4 +22,5 @@ const execute = (stash: ICommand[], commandString: string) => {
   return Promise.resolve(command.callback(argv, commandString))
 }
 
-export default execute
+export default executeCommand
+export { executeCommand }
