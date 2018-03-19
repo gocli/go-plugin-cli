@@ -5,17 +5,6 @@ const uid = () => (uid.id = (uid.id || 0) + 1).toString()
 const createApp = () =>
   ({ use (plugin) { (plugin.install || plugin)(app) } })
 
-const defaults = {
-  callback: undefined,
-  commands: undefined,
-  description: undefined,
-  name: undefined,
-  prefix: undefined,
-  title: undefined
-}
-
-const applyDefaults = command => Object.assign({}, defaults, command)
-
 const methods = {}
 const fixture = (id = uid()) => ({
   callback: (methods[id] || (methods[id] = () => {})),

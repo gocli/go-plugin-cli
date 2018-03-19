@@ -48,15 +48,12 @@ describe('registerCommand()', () => {
   })
 
   it('trigger errors', () => {
-    const name = 'command'
-    const callback = () => {}
-
     expect(() => registerCommand([])).toThrowError('`command` is required')
     expect(() => registerCommand([], 1)).toThrowError('you can register as a command a string, an object or an array')
     expect(() => registerCommand([], '')).toThrowError('`name` should be not empty string (given: "")')
     expect(() => registerCommand([], ' ')).toThrowError('`name` should be not empty string (given: " ")')
     expect(() => registerCommand([], null)).toThrowError('`command` should be a string, an object or an array and can not be empty (given: null)')
-    expect(() => registerCommand([], name)).toThrowError('`command` should contain either `callback` function or `commands` array (given: {"name":"command"})')
+    expect(() => registerCommand([], 'command')).toThrowError('`command` should contain either `callback` function or `commands` array (given: {"name":"command"})')
   })
 
   it('register one command with extra options', () => {
