@@ -45,109 +45,6 @@ describe('Cli Plugin', () => {
     expect(commands.length).toBe(0)
   })
 
-  it('register one command using shortcut', () => {
-    const { name, callback } = fixture()
-
-    app.registerCommand(name, callback)
-    const commands = app.getCommands()
-
-    expect(commands).toEqual([
-      applyDefaults({ name, callback })
-    ])
-  })
-
-  it('register one command using object', () => {
-    const { name, callback } = fixture()
-
-    app.registerCommand({ name, callback })
-    const commands = app.getCommands()
-    expect(commands).toEqual([
-      applyDefaults({ name, callback })
-    ])
-  })
-
-  it('ignore callback option when command is an object', () => {
-    const { name, callback } = fixture()
-
-    app.registerCommand({ name, callback }, () => {})
-    const commands = app.getCommands()
-    expect(commands).toEqual([
-      applyDefaults({ name, callback })
-    ])
-  })
-
-  it('register one command with extra options', () => {
-    const id = uid()
-    const command = fixture(id)
-    command._extra_option = 1
-
-    app.registerCommand(command)
-    const commands = app.getCommands()
-    expect(commands).toEqual([fixture(id)])
-  })
-
-  it('register multiple commands', () => {
-    const command1 = { name: 'name1', callback: () => {} }
-    const command2 = { name: 'name2', callback: () => {} }
-
-    app.registerCommand([ command1, command2 ])
-    expect(app.getCommands()).toEqual([
-      applyDefaults(command1),
-      applyDefaults(command2)
-    ])
-  })
-
-  it('register nested command', () => {
-    const id1 = uid()
-    const id2 = uid()
-
-    const command = fixture(id1)
-    const { name, callback } = fixture(id2)
-    command.commands = [ { name, callback } ]
-
-    app.registerCommand(command)
-
-    const commands = app.getCommands()
-    expect(commands).toEqual([
-      applyDefaults({
-        ...command,
-        commands: [
-          applyDefaults({ name, callback })
-        ]
-      })
-    ])
-  })
-
-  it('register multiple nested commands', () => {
-    const id1 = uid()
-    const id2 = uid()
-
-    const command = fixture()
-    command.commands = [ fixture(id1), fixture(id2) ]
-
-    app.registerCommand(command)
-    const commands = app.getCommands()
-    expect(commands).toEqual([
-      applyDefaults({
-        ...command,
-        commands: [
-          fixture(id1),
-          fixture(id2)
-        ]
-      })
-    ])
-  })
-
-  it('register multiple commands', () => {
-    const [ id1, id2 ] = [ uid(), uid() ]
-    app.registerCommand(fixture(id1))
-    app.registerCommand(fixture(id2))
-    expect(app.getCommands()).toEqual([
-      fixture(id1),
-      fixture(id2)
-    ])
-  })
-
   it('execute commands', async () => {
     const callback = jest.fn()
     const command = { ...fixture(), callback }
@@ -159,10 +56,7 @@ describe('Cli Plugin', () => {
 
     await app.executeCommand(`${command.name} extra`)
     expect(callback).toHaveBeenCalledTimes(2)
-    expect(callback).toHaveBeenCalledWith(
-      { _: [ command.name, 'extra' ] },
-      `${command.name} extra`
-    )
+    expect(callback).toHaveBeenCalledWith({ _: [ command.name, 'extra' ] })
   })
 
   it('execute nested commands', async () => {
@@ -207,32 +101,9 @@ describe('Cli Plugin', () => {
   })
 
   it('execute triggers errors', async () => {
-    await expect(() => app.executeCommand()).toThrowError('`command` should be not empty string')
+    await expect(() => app.executeCommand()).toThrowError('`command` should be a string or an object (read docs)')
     await expect(app.executeCommand('not_registerd_command')).rejects.toThrowError('command is not registered')
     app.registerCommand({ name: 'command', commands: [ fixture() ] })
     await expect(app.executeCommand('command')).rejects.toThrowError('command doesn\'t have a callback')
-  })
-
-  it('trigger all register errors', async () => {
-    const name = 'command'
-    const callback = () => {}
-
-    await expect(() => app.registerCommand()).toThrowError('`command` is required')
-    await expect(() => app.registerCommand(1)).toThrowError('`command` should be a string, an object or an array')
-    await expect(() => app.registerCommand('')).toThrowError('`name` should be not empty string (given: "")')
-    await expect(() => app.registerCommand(' ')).toThrowError('`name` should be not empty string (given: " ")')
-    await expect(() => app.registerCommand(null)).toThrowError('`command` should be a string, an object or an array and can not be empty (given: null)')
-    await expect(() => app.registerCommand({})).toThrowError('`command` should be a string, an object or an array and can not be empty (given: {})')
-    await expect(() => app.registerCommand({ randomPropertyHere: 1 })).toThrowError('`name` should be not empty string (given: undefined)')
-    await expect(() => app.registerCommand({ name: null })).toThrowError('`name` should be not empty string (given: null)')
-    await expect(() => app.registerCommand(name)).toThrowError('`command` should contain either `callback` function or `commands` array (given: {"name":"command"})')
-    await expect(() => app.registerCommand({ name })).toThrowError('`command` should contain either `callback` function or `commands` array (given: {"name":"command"})')
-    await expect(() => app.registerCommand({ name }, callback)).toThrowError('`command` should contain either `callback` function or `commands` array (given: {"name":"command"})')
-    await expect(() => app.registerCommand({ name, callback: 1 })).toThrowError('`callback` must be a function (given: 1)')
-    await expect(() => app.registerCommand({ name, commands: [] })).toThrowError('`commands` must be an array and it can not be empty (given: [])')
-    await expect(() => app.registerCommand({ name, commands: [ name ] })).toThrowError('`command` should be an object (given: "command")')
-    await expect(() => app.registerCommand({ name, callback, description: 1 })).toThrowError('`description` must be not empty string (given: 1)')
-    await expect(() => app.registerCommand({ name, callback, title: 1 })).toThrowError('`title` must be not empty string (given: 1)')
-    await expect(() => app.registerCommand({ name, callback, prefix: 1 })).toThrowError('`prefix` must be not empty string (given: 1)')
   })
 })

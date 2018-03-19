@@ -1,20 +1,22 @@
 import { executeCommand } from './execute-command'
 import { registerCommand } from './register-command'
-import { Opts as MinimistOpts , ParsedArgs as MinimistArgs } from 'minimist'
+import { Opts as IParserOptions , ParsedArgs as IParsedCommand } from 'minimist'
+
+type ICommandRequest = string | IParsedCommand
 
 interface ICommandCallback {
-  (args: MinimistArgs, command: string): void
+  (args: IParsedCommand): void
 }
 
 interface IParser {
-  (command: string): MinimistArgs
+  (command: string): IParsedCommand
 }
 
 interface IValidator {
-  (args: MinimistArgs): any
+  (args: IParsedCommand): any
 }
 
-type ICommandParser = MinimistOpts | IParser
+type ICommandParser = IParserOptions | IParser
 type ICommandValidator = string | string[] | IValidator
 
 interface ICommand {
@@ -70,9 +72,11 @@ export {
   ICommand,
   ICommandCallback,
   ICommandParser,
+  ICommandRequest,
   ICommandValidator,
   IExecuteCommand,
   IGetCommands,
+  IParsedCommand,
   IParser,
   IRegisterCommand,
   IValidator,

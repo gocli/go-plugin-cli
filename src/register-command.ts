@@ -16,7 +16,7 @@ const registerCommand = (stash: ICommand[], commands: string | ICommand | IComma
 
   // tslint:disable-next-line: strict-type-predicates
   if (typeof commands !== 'object') {
-    throw new Error('`command` should be a string, an object or an array')
+    throw new Error('you can register as a command a string, an object or an array')
   }
 
   if (!Array.isArray(commands)) {

@@ -1,14 +1,17 @@
-import parse from './parse'
+import { parseCommand } from './parse'
 import { matchCommand } from './match-command'
-import { ICommand } from './plugin'
+import { ICommand, ICommandRequest } from './plugin'
 
-const executeCommand = (stash: ICommand[], commandString: string) => {
+const executeCommand = (stash: ICommand[], commandRequest: ICommandRequest) => {
   // tslint:disable-next-line: strict-type-predicates
-  if (typeof commandString !== 'string') {
-    throw new Error('`command` should be not empty string')
+  if (typeof commandRequest !== 'string') {
+    // tslint:disable-next-line: strict-type-predicates
+    if (!commandRequest || typeof commandRequest !== 'object' || !Array.isArray(commandRequest)) {
+      throw new Error('`command` should be a string or an object (read docs)')
+    }
   }
 
-  const command = matchCommand(stash, commandString)
+  const command = matchCommand(stash, commandRequest)
 
   if (!command) {
     return Promise.reject(new Error('command is not registered'))
@@ -18,8 +21,8 @@ const executeCommand = (stash: ICommand[], commandString: string) => {
     return Promise.reject(new Error('command doesn\'t have a callback'))
   }
 
-  const argv = parse(commandString)
-  return Promise.resolve(command.callback(argv, commandString))
+  const args = parseCommand(commandRequest)
+  return Promise.resolve(command.callback(args))
 }
 
 export default executeCommand
