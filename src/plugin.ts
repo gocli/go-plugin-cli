@@ -1,10 +1,21 @@
 import { executeCommand } from './execute-command'
 import { registerCommand } from './register-command'
-import { ParsedArgs } from 'minimist'
+import { Opts as MinimistOpts , ParsedArgs as MinimistArgs } from 'minimist'
 
 interface ICommandCallback {
-  (args: ParsedArgs, command: string): void
+  (args: MinimistArgs, command: string): void
 }
+
+interface IParser {
+  (command: string): MinimistArgs
+}
+
+interface IValidator {
+  (args: MinimistArgs): any
+}
+
+type ICommandParser = MinimistOpts | IParser
+type ICommandValidator = string | string[] | IValidator
 
 interface ICommand {
   name: string
@@ -12,19 +23,33 @@ interface ICommand {
   description?: string
   title?: string
   prefix?: string
+  parse?: ICommandParser
+  when?: ICommandValidator
   callback?: ICommandCallback
 }
 
+interface IExecuteCommand {
+  (command: string): Promise<void>
+}
+
+interface IRegisterCommand {
+  (stash: ICommand[], caller: any, commands: string | ICommand | ICommand[], callback?: ICommandCallback): void
+}
+
+interface IGetCommands {
+  (): ICommand[]
+}
+
 interface ICliPlugable {
-  executeCommand? (command: string): Promise<void>
-  registerCommand? (stash: ICommand[], caller: any, commands: string | ICommand | ICommand[], callback?: ICommandCallback): void
-  getCommands? (): ICommand[]
+  executeCommand?: IExecuteCommand
+  registerCommand?: IRegisterCommand
+  getCommands?: IGetCommands
 }
 
 interface ICliPlugged {
-  executeCommand (command: string): Promise<void>
-  registerCommand (stash: ICommand[], caller: any, commands: string | ICommand | ICommand[], callback?: ICommandCallback): void
-  getCommands (): ICommand[]
+  executeCommand: IExecuteCommand
+  registerCommand: IRegisterCommand
+  getCommands: IGetCommands
 }
 
 const CliPlugin = (proto: ICliPlugable = {}): ICliPlugged => {
@@ -38,4 +63,18 @@ const CliPlugin = (proto: ICliPlugable = {}): ICliPlugged => {
 }
 
 const install = CliPlugin
-export { install, CliPlugin, ICommand, ICliPlugable, ICliPlugged, ICommandCallback }
+export {
+  CliPlugin,
+  ICliPlugable,
+  ICliPlugged,
+  ICommand,
+  ICommandCallback,
+  ICommandParser,
+  ICommandValidator,
+  IExecuteCommand,
+  IGetCommands,
+  IParser,
+  IRegisterCommand,
+  IValidator,
+  install
+}
