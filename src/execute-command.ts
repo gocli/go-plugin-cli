@@ -6,8 +6,8 @@ const executeCommand = (stash: ICommand[], commandRequest: ICommandRequest) => {
   // tslint:disable-next-line: strict-type-predicates
   if (typeof commandRequest !== 'string') {
     // tslint:disable-next-line: strict-type-predicates
-    if (!commandRequest || typeof commandRequest !== 'object' || !Array.isArray(commandRequest)) {
-      throw new Error('`command` should be a string or an object (read docs)')
+    if (!commandRequest || typeof commandRequest !== 'object' || !Array.isArray(commandRequest._)) {
+      throw new Error('`command` should be a string or a specific object (read docs)')
     }
   }
 

@@ -3,7 +3,15 @@ import { ICommand, ICommandRequest, IParsedCommand } from './plugin'
 
 const match = (stash: ICommand[], triggered: IParsedCommand): ICommand | void => {
   const command = stash.slice(0).reverse()
-    .find(({ name }) => {
+    .find(({ name, parse, when }) => {
+      if (parse) {
+        console.log('do not forget about parse')
+      }
+
+      if (when) {
+        console.log('do not forget about when')
+      }
+
       return name.split(' ')
         .every((part, index) => part === triggered._[index])
     })
