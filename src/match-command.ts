@@ -1,19 +1,13 @@
 import { parseCommand } from './parse'
-import { ICommand, ICommandRequest, IParsedCommand } from './plugin'
+import { ICommand, ICommandRequest } from './plugin'
 
-const match = (stash: ICommand[], triggered: IParsedCommand): ICommand | void => {
+const matchCommand = (stash: ICommand[], triggered: ICommandRequest): ICommand | void => {
+  const parsed = parseCommand(triggered)
+
   const command = stash.slice(0).reverse()
-    .find(({ name, parse, when }) => {
-      if (parse) {
-        console.log('do not forget about parse')
-      }
-
-      if (when) {
-        console.log('do not forget about when')
-      }
-
+    .find(({ name }) => {
       return name.split(' ')
-        .every((part, index) => part === triggered._[index])
+        .every((part, index) => part === parsed._[index])
     })
 
   if (!command) {
@@ -22,19 +16,16 @@ const match = (stash: ICommand[], triggered: IParsedCommand): ICommand | void =>
 
   const parts = command.name.split(' ')
 
-  if (parts.length === triggered._.length) {
+  if (parts.length === parsed._.length) {
     return command
   }
 
   if (Array.isArray(command.commands)) {
-    return match(command.commands, { ...triggered, _: triggered._.slice(parts.length) })
+    return matchCommand(command.commands, { ...parsed, _: parsed._.slice(parts.length) })
   }
 
   return command
 }
-
-const matchCommand = (stash: ICommand[], commandRequest: ICommandRequest) =>
-  match(stash, parseCommand(commandRequest))
 
 export default matchCommand
 export { matchCommand }
