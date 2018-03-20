@@ -1,4 +1,4 @@
-import { parseCommand } from './parse'
+import { parseCommand } from './parse-command'
 import { ICommand, ICommandRequest } from './plugin'
 
 const matchCommand = (stash: ICommand[], triggered: ICommandRequest): ICommand | void => {
@@ -21,7 +21,7 @@ const matchCommand = (stash: ICommand[], triggered: ICommandRequest): ICommand |
   }
 
   if (Array.isArray(command.commands)) {
-    return matchCommand(command.commands, { ...parsed, _: parsed._.slice(parts.length) })
+    return matchCommand(command.commands, { ...parsed, _: parsed._.slice(parts.length) }) || command
   }
 
   return command

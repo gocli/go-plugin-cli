@@ -90,4 +90,28 @@ describe('executeCommand()', () => {
     await expect(executeCommand([{ name: 'ping', commands: [] }], 'ping'))
       .rejects.toThrowError('command doesn\'t have a callback')
   })
+
+  it('calls to callback with parsed args', async () => {
+    const pingCallback = jest.fn()
+    const meCallback = jest.fn()
+    const commands = [{
+      name: 'ping',
+      callback: pingCallback,
+      commands: [
+        { name: 'me', callback: meCallback }
+      ]
+    }]
+
+    await executeCommand(commands, 'ping')
+    expect(pingCallback).toHaveBeenCalledWith({ _: ['ping'] })
+
+    await executeCommand(commands, 'ping you')
+    expect(pingCallback).toHaveBeenCalledWith({ _: ['ping', 'you'] })
+
+    await executeCommand(commands, 'ping me')
+    expect(meCallback).toHaveBeenCalledWith({ _: ['ping', 'me'] })
+
+    await executeCommand(commands, 'ping --who me')
+    expect(pingCallback).toHaveBeenCalledWith({ _: ['ping'], who: 'me' })
+  })
 })

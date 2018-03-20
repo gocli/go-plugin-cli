@@ -1,4 +1,4 @@
-import { parseCommand } from './parse'
+import { parseCommand } from './parse-command'
 import { matchCommand } from './match-command'
 import { ICommand, ICommandRequest } from './plugin'
 
