@@ -1,4 +1,4 @@
-const { registerCommand } = require('../src/register-command')
+const { registerCommand } = require('../lib/register-command')
 
 describe('registerCommand()', () => {
   it('is a function', () => {

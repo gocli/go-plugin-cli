@@ -1,4 +1,4 @@
-const { matchCommand } = require('../src/match-command')
+const { matchCommand } = require('../lib/match-command')
 
 describe('matchCommand()', () => {
   const callback = () => {}

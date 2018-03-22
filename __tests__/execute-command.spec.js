@@ -1,65 +1,76 @@
-const { executeCommand } = require('../src/execute-command')
+const { executeCommand } = require('../lib/execute-command')
 
 describe('executeCommand()', () => {
   it('is a function', () => {
     expect(typeof executeCommand).toBe('function')
   })
 
-  it('calls a command using a string', async () => {
+  it('calls a command using a string', () => {
     const name = 'ping'
     const callback = jest.fn()
 
-    await executeCommand([{ name, callback }], 'ping')
-    expect(callback).toHaveBeenCalled()
+    return executeCommand([{ name, callback }], 'ping')
+      .then(() => {
+        expect(callback).toHaveBeenCalled()
+      })
   })
 
-  it('calls a command using an object', async () => {
+  it('calls a command using an object', () => {
     const name = 'ping'
     const callback = jest.fn()
 
-    await executeCommand([{ name, callback }], { _: ['ping'] })
-    expect(callback).toHaveBeenCalled()
+    return executeCommand([{ name, callback }], { _: ['ping'] })
+      .then(() => {
+        expect(callback).toHaveBeenCalled()
+      })
   })
 
-  it('calls only one command', async () => {
+  it('calls only one command', () => {
     const name = 'ping'
     const callback1 = jest.fn()
     const callback2 = jest.fn()
 
-    await executeCommand([
+    return executeCommand([
       { name, callback: callback1 },
       { name, callback: callback2 }
     ], 'ping')
-
-    expect(callback1).not.toHaveBeenCalled()
-    expect(callback2).toHaveBeenCalled()
+      .then(() => {
+        expect(callback1).not.toHaveBeenCalled()
+        expect(callback2).toHaveBeenCalled()
+      })
   })
 
-  it('calls when there are more arguments then in the command name', async () => {
+  it('calls when there are more arguments then in the command name', () => {
     const name = 'ping'
     const callback = jest.fn()
 
-    await executeCommand([{ name, callback }], 'ping me')
-    expect(callback).toHaveBeenCalled()
+    return executeCommand([{ name, callback }], 'ping me')
+      .then(() => {
+        expect(callback).toHaveBeenCalled()
+      })
   })
 
-  it('calls a command that consist of several parts', async () => {
+  it('calls a command that consist of several parts', () => {
     const name = 'ping me now'
     const callback = jest.fn()
 
-    await executeCommand([{ name, callback }], 'ping me now')
-    expect(callback).toHaveBeenCalled()
+    return executeCommand([{ name, callback }], 'ping me now')
+      .then(() => {
+        expect(callback).toHaveBeenCalled()
+      })
   })
 
-  it('resolves with the result of callback', async () => {
+  it('resolves with the result of callback', () => {
     const name = 'ping'
     const callback = () => Promise.resolve(42)
 
-    const result = await executeCommand([{ name, callback }], 'ping')
-    expect(result).toBe(42)
+    return executeCommand([{ name, callback }], 'ping')
+      .then(result => {
+        expect(result).toBe(42)
+      })
   })
 
-  it('trigger nested commands', async () => {
+  it('trigger nested commands', () => {
     const name = 'ping'
     const nestedName = 'me'
     const callback = jest.fn()
@@ -67,31 +78,37 @@ describe('executeCommand()', () => {
       { name, commands: [{ name: nestedName, callback }] }
     ]
 
-    await executeCommand(commands, 'ping me')
-    expect(callback).toHaveBeenCalled()
+    return executeCommand(commands, 'ping me')
+      .then(() => {
+        expect(callback).toHaveBeenCalled()
+      })
   })
 
-  it('fails if invalid command is given', async () => {
-    await expect(() => executeCommand([]))
-      .toThrowError('`command` should be a string or a specific object (read docs)')
-    await expect(() => executeCommand([], 1))
-      .toThrowError('`command` should be a string or a specific object (read docs)')
-    await expect(() => executeCommand([], null))
-      .toThrowError('`command` should be a string or a specific object (read docs)')
-    await expect(() => executeCommand([], {}))
-      .toThrowError('`command` should be a string or a specific object (read docs)')
+  it('fails if invalid command is given', () => {
+    return Promise.all([
+      expect(() => executeCommand([]))
+        .toThrowError('`command` should be a string or a specific object (read docs)'),
+      expect(() => executeCommand([], 1))
+        .toThrowError('`command` should be a string or a specific object (read docs)'),
+      expect(() => executeCommand([], null))
+        .toThrowError('`command` should be a string or a specific object (read docs)'),
+      expect(() => executeCommand([], {}))
+        .toThrowError('`command` should be a string or a specific object (read docs)')
+    ])
   })
 
-  it('fails if command is not exists, or when you call it with not complete set of arguments', async () => {
-    await expect(executeCommand([], 'ping'))
-      .rejects.toThrowError('command is not registered')
-    await expect(executeCommand([{ name: 'ping me', callback () {} }], 'ping'))
-      .rejects.toThrowError('command is not registered')
-    await expect(executeCommand([{ name: 'ping', commands: [] }], 'ping'))
-      .rejects.toThrowError('command doesn\'t have a callback')
+  it('fails if command is not exists, or when you call it with not complete set of arguments', () => {
+    return Promise.all([
+      expect(executeCommand([], 'ping'))
+        .rejects.toThrowError('command is not registered'),
+      expect(executeCommand([{ name: 'ping me', callback () {} }], 'ping'))
+        .rejects.toThrowError('command is not registered'),
+      expect(executeCommand([{ name: 'ping', commands: [] }], 'ping'))
+        .rejects.toThrowError('command doesn\'t have a callback')
+    ])
   })
 
-  it('calls to callback with parsed args', async () => {
+  it('calls to callback with parsed args', () => {
     const pingCallback = jest.fn()
     const meCallback = jest.fn()
     const commands = [{
@@ -102,16 +119,16 @@ describe('executeCommand()', () => {
       ]
     }]
 
-    await executeCommand(commands, 'ping')
-    expect(pingCallback).toHaveBeenCalledWith({ _: ['ping'] })
-
-    await executeCommand(commands, 'ping you')
-    expect(pingCallback).toHaveBeenCalledWith({ _: ['ping', 'you'] })
-
-    await executeCommand(commands, 'ping me')
-    expect(meCallback).toHaveBeenCalledWith({ _: ['ping', 'me'] })
-
-    await executeCommand(commands, 'ping --who me')
-    expect(pingCallback).toHaveBeenCalledWith({ _: ['ping'], who: 'me' })
+    return Promise.all([
+      executeCommand(commands, 'ping'),
+      executeCommand(commands, 'ping you'),
+      executeCommand(commands, 'ping me'),
+      executeCommand(commands, 'ping --who me')
+    ]).then(() => {
+      expect(pingCallback).toHaveBeenCalledWith({ _: ['ping'] })
+      expect(pingCallback).toHaveBeenCalledWith({ _: ['ping', 'you'] })
+      expect(meCallback).toHaveBeenCalledWith({ _: ['ping', 'me'] })
+      expect(pingCallback).toHaveBeenCalledWith({ _: ['ping'], who: 'me' })
+    })
   })
 })

@@ -1,4 +1,4 @@
-const { normalizeCommand } = require('../src/normalize-command')
+const { normalizeCommand } = require('../lib/normalize-command')
 
 describe('normalizeCommand()', () => {
   const name = 'command'
@@ -60,7 +60,14 @@ describe('normalizeCommand()', () => {
       prefix: 'prefix'
     }
 
-    expect(normalizeCommand({ ...props, commands: [{ ...props, callback }] }))
-      .toEqual({ ...normalized, commands: [{ ...normalized, callback }] })
+    const source = Object.assign({}, props, {
+      commands: [Object.assign({}, props, { callback })]
+    })
+    const expected = Object.assign({}, normalized, {
+      commands: [Object.assign({}, normalized, { callback })]
+    })
+
+    expect(normalizeCommand(source))
+      .toEqual(expected)
   })
 })
