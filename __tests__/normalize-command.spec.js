@@ -10,9 +10,9 @@ describe('normalizeCommand()', () => {
 
   it('throws', () => {
     expect(() => normalizeCommand(() => {}))
-      .toThrowError('`command` should be a string, an object or an array and can not be empty (given: "() => {}")')
+      .toThrowError('`command` should be an object (given: "() => {}")')
     expect(() => normalizeCommand({}))
-      .toThrowError('`command` should be a string, an object or an array and can not be empty (given: {})')
+      .toThrowError('`name` should be not empty string (given: undefined)')
     expect(() => normalizeCommand({ randomPropertyHere: 1 }))
       .toThrowError('`name` should be not empty string (given: undefined)')
     expect(() => normalizeCommand({ name: null }))
@@ -26,17 +26,11 @@ describe('normalizeCommand()', () => {
     expect(() => normalizeCommand({ name, commands: [ name ] }))
       .toThrowError('`command` should be an object (given: "command")')
     expect(() => normalizeCommand({ name, callback, description: 1 }))
-      .toThrowError('`description` must be not empty string (given: 1)')
-    expect(() => normalizeCommand({ name, callback, description: ' ' }))
-      .toThrowError('`description` must be not empty string (given: " ")')
+      .toThrowError('`description` must be a string (given: 1)')
     expect(() => normalizeCommand({ name, callback, title: 1 }))
-      .toThrowError('`title` must be not empty string (given: 1)')
-    expect(() => normalizeCommand({ name, callback, title: ' ' }))
-      .toThrowError('`title` must be not empty string (given: " ")')
+      .toThrowError('`title` must be a string (given: 1)')
     expect(() => normalizeCommand({ name, callback, prefix: 1 }))
-      .toThrowError('`prefix` must be not empty string (given: 1)')
-    expect(() => normalizeCommand({ name, callback, prefix: ' ' }))
-      .toThrowError('`prefix` must be not empty string (given: " ")')
+      .toThrowError('`prefix` must be a string (given: 1)')
   })
 
   it('normalize valid commands', () => {
@@ -55,9 +49,9 @@ describe('normalizeCommand()', () => {
 
     const normalized = {
       name: 'name',
-      description: 'description',
-      title: 'title',
-      prefix: 'prefix'
+      description: ' description ',
+      title: ' title ',
+      prefix: ' prefix '
     }
 
     const source = Object.assign({}, props, {

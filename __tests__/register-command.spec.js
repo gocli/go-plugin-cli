@@ -49,21 +49,36 @@ describe('registerCommand()', () => {
 
   it('trigger errors', () => {
     expect(() => registerCommand([])).toThrowError('`command` is required')
-    expect(() => registerCommand([], 1)).toThrowError('you can register as a command a string, an object or an array')
+    expect(() => registerCommand([], 1)).toThrowError('`command` should be an object (given: 1)')
     expect(() => registerCommand([], '')).toThrowError('`name` should be not empty string (given: "")')
     expect(() => registerCommand([], ' ')).toThrowError('`name` should be not empty string (given: " ")')
-    expect(() => registerCommand([], null)).toThrowError('`command` should be a string, an object or an array and can not be empty (given: null)')
+    expect(() => registerCommand([], null)).toThrowError('`command` should be an object (given: null)')
     expect(() => registerCommand([], 'command')).toThrowError('`command` should contain either `callback` function or `commands` array (given: {"name":"command"})')
   })
 
-  it('register one command with extra options', () => {
-    const command = { name: 'command', callback () {} }
-    const extraProperty = '__extraProperty__'
+  it('register with meta properties', () => {
+    const command = {
+      name: 'command',
+      title: 'TITLE',
+      prefix: 'PREFIX',
+      description: 'DESCRIPTION',
+      callback () {}
+    }
+
     const commands = []
-    command[extraProperty] = 1
 
     registerCommand(commands, command)
-    expect(commands[0]).not.toHaveProperty(extraProperty)
+    expect(commands[0]).toEqual(command)
+  })
+
+  it('register one command with unknown options', () => {
+    const command = { name: 'command', callback () {} }
+    const unknownProperty = '__unknownProperty__'
+    const commands = []
+    command[unknownProperty] = 1
+
+    registerCommand(commands, command)
+    expect(commands[0]).not.toHaveProperty(unknownProperty)
   })
 
   it('register nested command', () => {

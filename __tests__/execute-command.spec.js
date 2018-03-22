@@ -15,16 +15,6 @@ describe('executeCommand()', () => {
       })
   })
 
-  it('calls a command using an object', () => {
-    const name = 'ping'
-    const callback = jest.fn()
-
-    return executeCommand([{ name, callback }], { _: ['ping'] })
-      .then(() => {
-        expect(callback).toHaveBeenCalled()
-      })
-  })
-
   it('calls only one command', () => {
     const name = 'ping'
     const callback1 = jest.fn()
@@ -87,13 +77,13 @@ describe('executeCommand()', () => {
   it('fails if invalid command is given', () => {
     return Promise.all([
       expect(() => executeCommand([]))
-        .toThrowError('`command` should be a string or a specific object (read docs)'),
+        .toThrowError('`command` should be not empty string'),
       expect(() => executeCommand([], 1))
-        .toThrowError('`command` should be a string or a specific object (read docs)'),
+        .toThrowError('`command` should be not empty string'),
       expect(() => executeCommand([], null))
-        .toThrowError('`command` should be a string or a specific object (read docs)'),
-      expect(() => executeCommand([], {}))
-        .toThrowError('`command` should be a string or a specific object (read docs)')
+        .toThrowError('`command` should be not empty string'),
+      expect(() => executeCommand([], ''))
+        .toThrowError('`command` should be not empty string')
     ])
   })
 
