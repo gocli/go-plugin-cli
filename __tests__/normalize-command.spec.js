@@ -44,14 +44,22 @@ describe('normalizeCommand()', () => {
       name: ' name ',
       description: ' description ',
       title: ' title ',
-      prefix: ' prefix '
+      prefix: ' prefix ',
+      options: {
+        force: { type: Boolean, default: false, alias: 'f' },
+        who: String
+      }
     }
 
     const normalized = {
       name: 'name',
       description: ' description ',
       title: ' title ',
-      prefix: ' prefix '
+      prefix: ' prefix ',
+      options: {
+        force: { type: Boolean, default: false, alias: [ 'f' ] },
+        who: { type: String, default: undefined, alias: [] }
+      }
     }
 
     const source = Object.assign({}, props, {
@@ -63,5 +71,30 @@ describe('normalizeCommand()', () => {
 
     expect(normalizeCommand(source))
       .toEqual(expected)
+  })
+
+  it('normalize options list', () => {
+    const command = {
+      name,
+      callback,
+      options: {
+        who: String,
+        force: Boolean,
+        why: { default: 'because' },
+        module: { alias: 'm' },
+        modules: { alias: ['s', 'mods'] }
+      }
+    }
+
+    const expectedOptions = {
+      who: { type: String, default: undefined, alias: [] },
+      force: { type: Boolean, default: undefined, alias: [] },
+      why: { type: String, default: 'because', alias: [] },
+      module: { type: String, default: undefined, alias: ['m'] },
+      modules: { type: String, default: undefined, alias: ['s', 'mods'] }
+    }
+
+    expect(normalizeCommand(command).options)
+      .toEqual(expectedOptions)
   })
 })

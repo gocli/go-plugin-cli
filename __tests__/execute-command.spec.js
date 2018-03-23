@@ -115,10 +115,10 @@ describe('executeCommand()', () => {
       executeCommand(commands, 'ping me'),
       executeCommand(commands, 'ping --who me')
     ]).then(() => {
-      expect(pingCallback).toHaveBeenCalledWith({ _: ['ping'] })
-      expect(pingCallback).toHaveBeenCalledWith({ _: ['ping', 'you'] })
-      expect(meCallback).toHaveBeenCalledWith({ _: ['ping', 'me'] })
-      expect(pingCallback).toHaveBeenCalledWith({ _: ['ping'], who: 'me' })
+      expect(pingCallback).toHaveBeenCalledWith({ _: ['ping'], '--': [] })
+      expect(pingCallback).toHaveBeenCalledWith({ _: ['ping', 'you'], '--': [] })
+      expect(meCallback).toHaveBeenCalledWith({ _: ['ping', 'me'], '--': [] })
+      expect(pingCallback).toHaveBeenCalledWith({ _: ['ping'], who: 'me', '--': [] })
     })
   })
 })
