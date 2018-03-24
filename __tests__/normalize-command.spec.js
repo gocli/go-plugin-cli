@@ -8,7 +8,7 @@ describe('normalizeCommand()', () => {
     expect(typeof normalizeCommand).toBe('function')
   })
 
-  it('throws', () => {
+  it('throws if properties are invalid', () => {
     expect(() => normalizeCommand(() => {}))
       .toThrowError('`command` should be an object (given: "() => {}")')
     expect(() => normalizeCommand({}))
@@ -31,6 +31,27 @@ describe('normalizeCommand()', () => {
       .toThrowError('`title` must be a string (given: 1)')
     expect(() => normalizeCommand({ name, callback, prefix: 1 }))
       .toThrowError('`prefix` must be a string (given: 1)')
+  })
+
+  it('throws if options are invalid', () => {
+    const invalidOptionMsg = '`option` should be either Boolean, String or Object({ type, default, alias })'
+    expect(() => normalizeCommand({ name, callback, options: {} }))
+      .not.toThrow()
+
+    expect(() => normalizeCommand({ name, callback, options: { prop: null } }))
+      .toThrowError(`${invalidOptionMsg} (given: null)`)
+
+    expect(() => normalizeCommand({ name, callback, options: { prop: 'boolean' } }))
+      .toThrowError(`${invalidOptionMsg} (given: "boolean")`)
+
+    expect(() => normalizeCommand({ name, callback, options: { prop: { type: 'boolean' } } }))
+      .toThrowError('`option.type` should be either Boolean or String (given: "boolean")')
+
+    expect(() => normalizeCommand({ name, callback, options: { prop: { alias: 1 } } }))
+      .toThrowError('`option.alias` should be a string or an array of strings (given: 1)')
+
+    expect(() => normalizeCommand({ name, callback, options: { prop: { alias: [1] } } }))
+      .toThrowError('`option.alias` should be a string or an array of strings (given: [1])')
   })
 
   it('normalize valid commands', () => {

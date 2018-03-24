@@ -25,6 +25,14 @@ describe('parseCommand()', () => {
         f: 'pretty',
         '--': ['do', '--not', 'parse']
       })
+
+    expect(parseCommand(command, { who: { type: String, alias: [] } }))
+      .toEqual({
+        _: ['ping', 'now'],
+        who: 'me',
+        f: 'pretty',
+        '--': ['do', '--not', 'parse']
+      })
   })
 
   it('uses default option', () => {
