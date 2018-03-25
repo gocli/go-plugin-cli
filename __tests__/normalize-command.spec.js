@@ -45,13 +45,13 @@ describe('normalizeCommand()', () => {
       .toThrowError(`${invalidOptionMsg} (given: "boolean")`)
 
     expect(() => normalizeCommand({ name, callback, options: { prop: { type: 'boolean' } } }))
-      .toThrowError('`option.type` should be either Boolean or String (given: "boolean")')
+      .toThrowError('`prop.type` should be either Boolean or String (given: "boolean")')
 
     expect(() => normalizeCommand({ name, callback, options: { prop: { alias: 1 } } }))
-      .toThrowError('`option.alias` should be a string or an array of strings (given: 1)')
+      .toThrowError('`prop.alias` should be a string or an array of strings (given: 1)')
 
     expect(() => normalizeCommand({ name, callback, options: { prop: { alias: [1] } } }))
-      .toThrowError('`option.alias` should be a string or an array of strings (given: [1])')
+      .toThrowError('`prop.alias` should be a string or an array of strings (given: [1])')
   })
 
   it('normalize valid commands', () => {
@@ -112,10 +112,134 @@ describe('normalizeCommand()', () => {
       force: { type: Boolean, default: undefined, alias: [] },
       why: { type: String, default: 'because', alias: [] },
       module: { type: String, default: undefined, alias: ['m'] },
-      modules: { type: String, default: undefined, alias: ['s', 'mods'] }
+      modules: { type: String, default: undefined, alias: ['mods', 's'] }
     }
 
-    expect(normalizeCommand(command).options)
-      .toEqual(expectedOptions)
+    const parsed = normalizeCommand(command).options
+    parsed.modules.alias.sort()
+    expect(parsed).toEqual(expectedOptions)
+  })
+
+  it('normalize inherited option list', () => {
+    const nested = {
+      name,
+      callback,
+      options: {
+        child: Boolean,
+        force: { default: false, alias: ['f'] },
+        location: { alias: ['map', 'm', 'l'] },
+        version: { alias: 'v' }
+      }
+    }
+
+    const command = {
+      name,
+      commands: [ nested ],
+      options: {
+        parent: String,
+        force: Boolean,
+        location: { alias: 'l' },
+        version: { default: '0.0.0' }
+      }
+    }
+
+    const parsed = normalizeCommand(command)
+    parsed.commands[0].options.location.alias.sort()
+
+    expect(parsed)
+      .toEqual({
+        name,
+        description: undefined,
+        title: undefined,
+        prefix: undefined,
+        callback: undefined,
+        options: {
+          parent: { type: String, default: undefined, alias: [] },
+          force: { type: Boolean, default: undefined, alias: [] },
+          location: { type: String, default: undefined, alias: ['l'] },
+          version: { type: String, default: '0.0.0', alias: [] }
+        },
+        commands: [{
+          name,
+          callback,
+          description: undefined,
+          title: undefined,
+          prefix: undefined,
+          commands: undefined,
+          options: {
+            child: { type: Boolean, default: undefined, alias: [] },
+            parent: { type: String, default: undefined, alias: [] },
+            force: { type: Boolean, default: false, alias: ['f'] },
+            location: { type: String, default: undefined, alias: ['l', 'm', 'map'] },
+            version: { type: String, default: '0.0.0', alias: ['v'] }
+          }
+        }]
+      })
+  })
+
+  it('fails when trying to redefine inherited option type', () => {
+    const command1 = {
+      name,
+      commands: [ { name, callback, options: { location: Boolean } } ],
+      options: { location: String }
+    }
+
+    const command2 = {
+      name,
+      commands: [ { name, callback, options: { location: String } } ],
+      options: { location: Boolean }
+    }
+
+    expect(() => normalizeCommand(command1))
+      .toThrowError(
+        '`location.type` is defined in parent command as `String` and can not be redefined (given: Boolean)'
+      )
+
+    expect(() => normalizeCommand(command2))
+      .toThrowError(
+        '`location.type` is defined in parent command as `Boolean` and can not be redefined (given: String)'
+      )
+  })
+
+  it('fails when trying to redefine inherited option default', () => {
+    const nested = {
+      name,
+      callback,
+      options: {
+        version: { default: '0.0.0' }
+      }
+    }
+
+    const command = {
+      name,
+      commands: [ nested ],
+      options: {
+        version: { default: '0.0.1' }
+      }
+    }
+
+    expect(() => normalizeCommand(command))
+      .toThrowError('`version.default` is defined in parent command as `0.0.1` and can not be redefined')
+  })
+
+  it('fails when trying to reuse existing aliases in sub commands', () => {
+    const nested = {
+      name,
+      callback,
+      options: {
+        version: { alias: 'v' }
+      }
+    }
+
+    const command = {
+      name,
+      commands: [ nested ],
+      options: {
+        verbose: { alias: 'v' }
+      }
+    }
+
+    expect(() => normalizeCommand(command))
+      .toThrowError('aliases can not be redefined in inherited options (`v` is used for verbose, version)')
   })
 })

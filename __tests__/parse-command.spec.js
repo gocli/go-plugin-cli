@@ -76,4 +76,13 @@ describe('parseCommand()', () => {
         '--': ['do', '--not', 'parse']
       })
   })
+
+  it('collects multiple values', () => {
+    expect(parseCommand('ping -u 428 -u 985'))
+      .toEqual({
+        _: ['ping'],
+        u: [428, 985],
+        '--': []
+      })
+  })
 })

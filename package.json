@@ -42,7 +42,8 @@
   },
   "dependencies": {
     "is-empty": "github:termosa/is-empty",
-    "minimist": "1.2.0"
+    "minimist": "1.2.0",
+    "uniq": "^1.0.1"
   },
   "standard": {
     "globals": [
