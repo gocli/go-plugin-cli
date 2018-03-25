@@ -37,4 +37,42 @@ describe('matchCommand()', () => {
     expect(matchCommand(commands, `${command3.name} ${command3.commands[2].name} --and --with flags`))
       .toEqual(command3.commands[2])
   })
+
+  it('filters commands by `when` option', () => {
+    const commands = [
+      {
+        callback: jest.fn(),
+        name: 'command',
+        options: {
+          force: { type: Boolean, default: undefined, alias: [] }
+        },
+        when: { force: false }
+      },
+      {
+        callback: jest.fn(),
+        name: 'command',
+        options: {
+          force: { type: Boolean, default: undefined, alias: [] }
+        },
+        when: { force: true }
+      }
+    ]
+
+    const [ woForce, wForce ] = commands
+
+    expect(matchCommand(commands, 'command --force')).toEqual(wForce)
+    expect(matchCommand(commands, 'command')).toEqual(woForce)
+  })
+
+  it('match deep nested commands', () => {
+    const deepCommand = { name: 'you can', callback }
+    const commands = [{
+      name: 'ping me',
+      commands: [
+        { name: 'if', commands: [ deepCommand ] }
+      ]
+    }]
+
+    expect(matchCommand(commands, 'ping me if you can')).toEqual(deepCommand)
+  })
 })
