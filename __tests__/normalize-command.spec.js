@@ -1,4 +1,4 @@
-const { normalizeCommand } = require('../lib/normalize-command')
+const { normalizeCommand } = require('../lib/helpers/normalize-command')
 
 describe('normalizeCommand()', () => {
   const name = 'command'
