@@ -38,7 +38,87 @@ describe('matchCommand()', () => {
       .toEqual(command3.commands[2])
   })
 
-  it('filters commands by `when` option', () => {
+  it('filters commands by `when` option if it is a function', () => {
+    const commands = [
+      {
+        callback: jest.fn(),
+        name: 'command'
+      },
+      {
+        callback: jest.fn(),
+        name: 'command',
+        when: ({ name, force }) => force && name === 'some'
+      },
+      {
+        callback: jest.fn(),
+        name: 'generate'
+      },
+      {
+        callback: jest.fn(),
+        name: 'generate',
+        when: ({ _ }) => _[1] === 'component'
+      }
+    ]
+
+    const [ woFilter, wFilter, generalGenerate, componentGenerate ] = commands
+
+    expect(matchCommand(commands, 'command --force --name some')).toEqual(wFilter)
+    expect(matchCommand(commands, 'command --force --name someone')).toEqual(woFilter)
+    expect(matchCommand(commands, 'command')).toEqual(woFilter)
+
+    expect(matchCommand(commands, 'generate')).toEqual(generalGenerate)
+    expect(matchCommand(commands, 'generate component')).toEqual(componentGenerate)
+  })
+
+  it('filters commands by `when` option if it is a string', () => {
+    const commands = [
+      {
+        callback: jest.fn(),
+        name: 'command'
+      },
+      {
+        callback: jest.fn(),
+        name: 'command',
+        when: 'force'
+      }
+    ]
+
+    const [ woForce, wForce ] = commands
+
+    expect(matchCommand(commands, 'command --force')).toEqual(wForce)
+    expect(matchCommand(commands, 'command')).toEqual(woForce)
+  })
+
+  it('filters commands by `when` option if it is an array', () => {
+    const commands = [
+      {
+        callback: jest.fn(),
+        name: 'command'
+      },
+      {
+        callback: jest.fn(),
+        name: 'command',
+        when: ['force']
+      },
+      {
+        callback: jest.fn(),
+        name: 'command',
+        options: {
+          force: { type: Boolean, default: undefined, alias: [] }
+        },
+        when: ['force', 'name']
+      }
+    ]
+
+    const [ firstCommandWithoutForce, secondCommandWithForce, lastCommandWithForceAndName ] = commands
+
+    expect(matchCommand(commands, 'command --force')).toEqual(secondCommandWithForce)
+    expect(matchCommand(commands, 'command')).toEqual(firstCommandWithoutForce)
+    expect(matchCommand(commands, 'command --no-force')).toEqual(firstCommandWithoutForce)
+    expect(matchCommand(commands, 'command --force --name some')).toEqual(lastCommandWithForceAndName)
+  })
+
+  it('filters commands by `when` option if it is an object', () => {
     const commands = [
       {
         callback: jest.fn(),
@@ -62,6 +142,34 @@ describe('matchCommand()', () => {
 
     expect(matchCommand(commands, 'command --force')).toEqual(wForce)
     expect(matchCommand(commands, 'command')).toEqual(woForce)
+  })
+
+  it('filters commands by `when` they are specified interpreting them as boolean', () => {
+    const commands = [
+      {
+        callback: jest.fn(),
+        name: 'command'
+      },
+      {
+        callback: jest.fn(),
+        name: 'command',
+        when: true
+      },
+      {
+        callback: jest.fn(),
+        name: 'command',
+        when: null
+      },
+      {
+        callback: jest.fn(),
+        name: 'command',
+        when: false
+      }
+    ]
+
+    const alwaysValidCommand = commands[1]
+
+    expect(matchCommand(commands, 'command')).toEqual(alwaysValidCommand)
   })
 
   it('match deep nested commands', () => {
