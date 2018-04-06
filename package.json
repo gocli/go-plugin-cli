@@ -2,7 +2,7 @@
   "name": "go-plugin-cli",
   "version": "2.0.0",
   "description": "Go plugin to create and execute commmands",
-  "main": "./lib",
+  "main": "./lib/plugin.js",
   "scripts": {
     "lint": "standard -v | snazzy",
     "unit": "jest --coverage",

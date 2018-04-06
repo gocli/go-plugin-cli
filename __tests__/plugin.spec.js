@@ -7,6 +7,7 @@ describe('Cli Plugin', () => {
     expect(plugin.install).toBe(plugin.CliPlugin)
     expect(plugin.install()).toHaveProperty('executeCommand')
     expect(plugin.install()).toHaveProperty('registerCommand')
+    expect(plugin.install()).toHaveProperty('matchCommand')
     expect(plugin.install()).toHaveProperty('getCommands')
     expect(() => plugin.install({})).not.toThrow()
   })
@@ -17,6 +18,7 @@ describe('Cli Plugin', () => {
 
     expect(typeof obj.executeCommand).toBe('function', 'exports executeCommand()')
     expect(typeof obj.registerCommand).toBe('function', 'exports registerCommand()')
+    expect(typeof obj.matchCommand).toBe('function', 'exports matchCommand()')
     expect(typeof obj.getCommands).toBe('function', 'exports getCommands()')
   })
 

@@ -66,6 +66,7 @@ describe('normalizeCommand()', () => {
       description: ' description ',
       title: ' title ',
       prefix: ' prefix ',
+      when: ' force ',
       options: {
         force: { type: Boolean, default: false, alias: 'f' },
         who: String
@@ -77,6 +78,7 @@ describe('normalizeCommand()', () => {
       description: ' description ',
       title: ' title ',
       prefix: ' prefix ',
+      when: ' force ',
       options: {
         force: { type: Boolean, default: false, alias: [ 'f' ] },
         who: { type: String, default: undefined, alias: [] }
