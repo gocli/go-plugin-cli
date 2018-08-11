@@ -1,8 +1,18 @@
+const mockNormalizeCommandOptions = (() => {
+  const mock = { normalizeCommandOptions: jest.fn() }
+  jest.mock('../lib/helpers/normalize-command-options', () => mock)
+  return mock.normalizeCommandOptions
+})()
+
 const { normalizeCommand } = require('../lib/helpers/normalize-command')
 
 describe('normalizeCommand()', () => {
   const name = 'command'
   const callback = () => {}
+
+  beforeEach(() => {
+    mockNormalizeCommandOptions.mockReset()
+  })
 
   it('is a function', () => {
     expect(typeof normalizeCommand).toBe('function')
@@ -33,215 +43,90 @@ describe('normalizeCommand()', () => {
       .toThrowError('`prefix` must be a string (given: 1)')
   })
 
-  it('throws if options are invalid', () => {
-    const invalidOptionMsg = '`option` should be either Boolean, String or Object({ type, default, alias })'
-    expect(() => normalizeCommand({ name, callback, options: {} }))
-      .not.toThrow()
-
-    expect(() => normalizeCommand({ name, callback, options: { prop: null } }))
-      .toThrowError(`${invalidOptionMsg} (given: null)`)
-
-    expect(() => normalizeCommand({ name, callback, options: { prop: 'boolean' } }))
-      .toThrowError(`${invalidOptionMsg} (given: "boolean")`)
-
-    expect(() => normalizeCommand({ name, callback, options: { prop: { type: 'boolean' } } }))
-      .toThrowError('`prop.type` should be either Boolean or String (given: "boolean")')
-
-    expect(() => normalizeCommand({ name, callback, options: { prop: { alias: 1 } } }))
-      .toThrowError('`prop.alias` should be a string or an array of strings (given: 1)')
-
-    expect(() => normalizeCommand({ name, callback, options: { prop: { alias: [1] } } }))
-      .toThrowError('`prop.alias` should be a string or an array of strings (given: [1])')
-  })
-
-  it('normalize valid commands', () => {
+  it('normalize valid command with callback only', () => {
     expect(normalizeCommand({ name, callback }))
       .toEqual({ name, callback })
+  })
 
-    expect(normalizeCommand({ name, commands: [{ name, callback }] }))
-      .toEqual({ name, commands: [{ name, callback }] })
+  it('normalize valid command with sub-command only', () => {
+    const normalized = normalizeCommand({ name, commands: [{ name, callback }] })
+    const parent = normalized.commands[0].parent
+    delete normalized.commands[0].parent
 
-    const props = {
+    expect(normalized).toEqual({ name, commands: [{ name, callback }] })
+    expect(parent).toEqual(normalized)
+  })
+
+  it('normalize valid command with all properties', () => {
+    const sourceCmd = {
       name: ' name ',
       description: ' description ',
       title: ' title ',
       prefix: ' prefix ',
-      when: ' force ',
-      options: {
-        force: { type: Boolean, default: false, alias: 'f' },
-        who: String
-      }
+      when: ' force '
     }
 
-    const normalized = {
+    const expectedCmd = {
       name: 'name',
       description: ' description ',
       title: ' title ',
       prefix: ' prefix ',
-      when: ' force ',
-      options: {
-        force: { type: Boolean, default: false, alias: [ 'f' ] },
-        who: { type: String, default: undefined, alias: [] }
-      }
+      when: ' force '
     }
 
-    const source = Object.assign({}, props, {
-      commands: [Object.assign({}, props, { callback })]
+    const source = Object.assign({}, sourceCmd, {
+      commands: [Object.assign({}, sourceCmd, { callback })]
     })
-    const expected = Object.assign({}, normalized, {
-      commands: [Object.assign({}, normalized, { callback })]
+    const expected = Object.assign({}, expectedCmd, {
+      commands: [Object.assign({}, expectedCmd, { callback })]
     })
 
-    expect(normalizeCommand(source))
-      .toEqual(expected)
+    const normalized = normalizeCommand(source)
+    const parent = normalized.commands[0].parent
+    delete normalized.commands[0].parent
+
+    expect(normalized).toEqual(expected)
+    expect(parent).toEqual(normalized)
   })
 
-  it('normalize options list', () => {
-    const command = {
-      name,
-      callback,
-      options: {
-        who: String,
-        force: Boolean,
-        why: { default: 'because' },
-        module: { alias: 'm' },
-        modules: { alias: ['s', 'mods'] }
-      }
-    }
+  it('normalizes options list', () => {
+    const givenOptions = 'OPTIONS'
+    const expectedOptions = { NORMALIZED: {} }
 
-    const expectedOptions = {
-      who: { type: String, default: undefined, alias: [] },
-      force: { type: Boolean, default: undefined, alias: [] },
-      why: { type: String, default: 'because', alias: [] },
-      module: { type: String, default: undefined, alias: ['m'] },
-      modules: { type: String, default: undefined, alias: ['mods', 's'] }
-    }
+    mockNormalizeCommandOptions.mockReturnValue(expectedOptions)
 
-    const parsed = normalizeCommand(command).options
-    parsed.modules.alias.sort()
-    expect(parsed).toEqual(expectedOptions)
+    expect(normalizeCommand({ name, callback, options: givenOptions }))
+      .toEqual({ name, callback, options: expectedOptions })
+    expect(mockNormalizeCommandOptions)
+      .toHaveBeenCalledTimes(1)
+    expect(mockNormalizeCommandOptions)
+      .toHaveBeenCalledWith(givenOptions, undefined)
   })
 
-  it('normalize inherited option list', () => {
-    const nested = {
+  it('normalizes options list with inherited options', () => {
+    const givenOptions = 'OPTIONS'
+    const givenChildOptions = 'CHILD_OPTIONS'
+    const expectedOptions = { NORMALIZED: {} }
+    const expectedChildOptions = { CHILD_NORMALIZED: {} }
+    const cmd = {
       name,
-      callback,
-      options: {
-        child: Boolean,
-        force: { default: false, alias: ['f'] },
-        location: { alias: ['map', 'm', 'l'] },
-        version: { alias: 'v' }
-      }
+      options: givenOptions,
+      commands: [{ name, callback, options: givenChildOptions }]
     }
 
-    const command = {
-      name,
-      commands: [ nested ],
-      options: {
-        parent: String,
-        force: Boolean,
-        location: { alias: 'l' },
-        version: { default: '0.0.0' }
-      }
-    }
+    mockNormalizeCommandOptions.mockImplementation((opts) => {
+      if (opts === givenOptions) return expectedOptions
+      if (opts === givenChildOptions) return expectedChildOptions
+      return 'FAILED'
+    })
 
-    const parsed = normalizeCommand(command)
-    parsed.commands[0].options.location.alias.sort()
+    normalizeCommand(cmd)
 
-    expect(parsed)
-      .toEqual({
-        name,
-        description: undefined,
-        title: undefined,
-        prefix: undefined,
-        callback: undefined,
-        options: {
-          parent: { type: String, default: undefined, alias: [] },
-          force: { type: Boolean, default: undefined, alias: [] },
-          location: { type: String, default: undefined, alias: ['l'] },
-          version: { type: String, default: '0.0.0', alias: [] }
-        },
-        commands: [{
-          name,
-          callback,
-          description: undefined,
-          title: undefined,
-          prefix: undefined,
-          commands: undefined,
-          options: {
-            child: { type: Boolean, default: undefined, alias: [] },
-            parent: { type: String, default: undefined, alias: [] },
-            force: { type: Boolean, default: false, alias: ['f'] },
-            location: { type: String, default: undefined, alias: ['l', 'm', 'map'] },
-            version: { type: String, default: '0.0.0', alias: ['v'] }
-          }
-        }]
-      })
-  })
-
-  it('fails when trying to redefine inherited option type', () => {
-    const command1 = {
-      name,
-      commands: [ { name, callback, options: { location: Boolean } } ],
-      options: { location: String }
-    }
-
-    const command2 = {
-      name,
-      commands: [ { name, callback, options: { location: String } } ],
-      options: { location: Boolean }
-    }
-
-    expect(() => normalizeCommand(command1))
-      .toThrowError(
-        '`location.type` is defined in parent command as `String` and can not be redefined (given: Boolean)'
-      )
-
-    expect(() => normalizeCommand(command2))
-      .toThrowError(
-        '`location.type` is defined in parent command as `Boolean` and can not be redefined (given: String)'
-      )
-  })
-
-  it('fails when trying to redefine inherited option default', () => {
-    const nested = {
-      name,
-      callback,
-      options: {
-        version: { default: '0.0.0' }
-      }
-    }
-
-    const command = {
-      name,
-      commands: [ nested ],
-      options: {
-        version: { default: '0.0.1' }
-      }
-    }
-
-    expect(() => normalizeCommand(command))
-      .toThrowError('`version.default` is defined in parent command as `0.0.1` and can not be redefined')
-  })
-
-  it('fails when trying to reuse existing aliases in sub commands', () => {
-    const nested = {
-      name,
-      callback,
-      options: {
-        version: { alias: 'v' }
-      }
-    }
-
-    const command = {
-      name,
-      commands: [ nested ],
-      options: {
-        verbose: { alias: 'v' }
-      }
-    }
-
-    expect(() => normalizeCommand(command))
-      .toThrowError('aliases can not be redefined in inherited options (`v` is used for verbose, version)')
+    expect(mockNormalizeCommandOptions)
+      .toHaveBeenCalledTimes(2)
+    expect(mockNormalizeCommandOptions)
+      .toHaveBeenCalledWith(givenOptions, undefined)
+    expect(mockNormalizeCommandOptions)
+      .toHaveBeenCalledWith(givenChildOptions, expectedOptions)
   })
 })

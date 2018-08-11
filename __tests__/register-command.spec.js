@@ -91,6 +91,8 @@ describe('registerCommand()', () => {
     const commands = []
 
     registerCommand(commands, command)
+    const { parent } = commands[0].commands[0]
+    delete commands[0].commands[0].parent
 
     expect(commands.length).toBe(1)
     expect(commands).toContainEqual({
@@ -98,6 +100,7 @@ describe('registerCommand()', () => {
       callback: command.callback,
       commands: [ nested ]
     })
+    expect(parent).toEqual(commands[0])
   })
 
   it('register multiple nested commands', () => {
@@ -111,6 +114,10 @@ describe('registerCommand()', () => {
     const commands = []
 
     registerCommand(commands, command)
+    const parent1 = commands[0].commands[0].parent
+    delete commands[0].commands[0].parent
+    const parent2 = commands[0].commands[1].parent
+    delete commands[0].commands[1].parent
 
     expect(commands.length).toBe(1)
     expect(commands).toContainEqual({
@@ -118,5 +125,7 @@ describe('registerCommand()', () => {
       callback: command.callback,
       commands: [ nested1, nested2 ]
     })
+    expect(parent1).toEqual(commands[0])
+    expect(parent2).toEqual(commands[0])
   })
 })
