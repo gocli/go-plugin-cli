@@ -46,7 +46,7 @@
   },
   "dependencies": {
     "is-empty": "1.2.0",
-    "minimist": "1.2.0",
+    "minimist": "1.2.2",
     "uniq": "1.0.1"
   },
   "standard": {
